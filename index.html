@@ -147,9 +147,9 @@ const VALID_FIRSTNAMES = new Set(P.map(p => p.first).filter(f => f && f.length >
 const MAX = 6, HINT_AFTER = 3;
 let hintUsed = false;
 
+const DAY_IDX = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / 86400000);
 function daily() {
-  const idx = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / 86400000) % P.length;
-  return P[idx];
+  return P[DAY_IDX % P.length];
 }
 const D = daily(), ANS = D.name, WL = ANS.length;
 let guesses = [], cur = '', over = false, ks = {};
@@ -164,7 +164,7 @@ function isValidGuess(g) {
 function loadState() {
   try {
     const s = JSON.parse(localStorage.getItem('mackemdle_cf1') || 'null');
-    if (!s || s.date !== new Date().toDateString()) return;
+    if (!s || s.dayIdx !== DAY_IDX) return;
     guesses = s.guesses || []; ks = s.ks || {};
     if (s.over) over = true;
     hintUsed = s.hintUsed || false;
@@ -184,7 +184,7 @@ function saveState(won) {
       }
       localStorage.setItem('mackemdle_stats_cf1', JSON.stringify(st));
     }
-    localStorage.setItem('mackemdle_cf1', JSON.stringify({ date: new Date().toDateString(), guesses, ks, over, hintUsed }));
+    localStorage.setItem('mackemdle_cf1', JSON.stringify({ dayIdx: DAY_IDX, guesses, ks, over, hintUsed }));
   } catch(e) {}
 }
 function getSt() { try { return JSON.parse(localStorage.getItem('mackemdle_stats_cf1') || '{}'); } catch(e) { return {}; } }
