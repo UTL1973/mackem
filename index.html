@@ -147,7 +147,23 @@ const VALID_FIRSTNAMES = new Set(P.map(p => p.first).filter(f => f && f.length >
 const MAX = 6, HINT_AFTER = 3;
 let hintUsed = false;
 
-const DAY_IDX = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / 86400000);
+// Calculate day index based on UK midnight (handles GMT/BST automatically)
+function getUKDayIdx() {
+  const epoch = new Date('2024-01-01');
+  // Get today's date string in UK timezone e.g. "2026-06-09"
+  const ukToday = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date()).split('/').reverse().join('-');
+  // Get epoch date string in UK timezone
+  const ukEpoch = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(epoch).split('/').reverse().join('-');
+  const msPerDay = 86400000;
+  return Math.floor((new Date(ukToday) - new Date(ukEpoch)) / msPerDay);
+}
+const DAY_IDX = getUKDayIdx();
 function daily() {
   return P[DAY_IDX % P.length];
 }
@@ -362,8 +378,30 @@ function share() {
 
 function startTimer() {
   function upd() {
-    const now = new Date(), tom = new Date(now); tom.setHours(24, 0, 0, 0);
-    const d = tom - now, h = Math.floor(d / 3600000), m = Math.floor((d % 3600000) / 60000), s = Math.floor((d % 60000) / 1000);
+    const now = new Date();
+    // Find next UK midnight
+    const ukDateStr = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(now).split('/').reverse().join('-');
+    // Next UK midnight = start of tomorrow in UK time
+    const ukMidnightToday = new Date(new Date(ukDateStr).toLocaleString('en-GB', { timeZone: 'Europe/London' }));
+    // Add one day to get tomorrow's UK midnight
+    const nextUKMidnight = new Date(ukDateStr);
+    nextUKMidnight.setDate(nextUKMidnight.getDate() + 1);
+    // Convert to UTC by checking the offset
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      hour: 'numeric', minute: 'numeric', hour12: false
+    });
+    // Simpler: get ms until next UK midnight using offset trick
+    const londonNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const londonTomorrow = new Date(londonNow);
+    londonTomorrow.setHours(24, 0, 0, 0);
+    const diff = londonTomorrow - londonNow;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
     const el = document.getElementById('timer');
     if (el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
