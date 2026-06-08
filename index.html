@@ -283,8 +283,8 @@ function sub() {
   updateKeys(cur, ANS); setTimeout(updateKB, WL * 120 + 50);
   guesses.push(cur); const won = cur === ANS; cur = '';
   setTimeout(updateHintArea, WL * 120 + 60);
-  if (won) { over = true; saveState(true); setTimeout(() => showResult(true), WL * 120 + 300); }
-  else if (guesses.length >= MAX) { over = true; saveState(false); setTimeout(() => showResult(false), WL * 120 + 300); }
+  if (won) { over = true; saveState(true); setTimeout(() => showResult(true, true), WL * 120 + 300); }
+  else if (guesses.length >= MAX) { over = true; saveState(false); setTimeout(() => showResult(false, true), WL * 120 + 300); }
   else saveState(undefined);
 }
 
@@ -305,17 +305,19 @@ function buildDistChart(dist, numGuesses, won) {
   }).join('');
 }
 
-function showResult(won) {
-  // Update distribution here so we are certain it is saved before we read it back
+function showResult(won, record = false) {
   const st = getSt();
-  if (!st.dist) st.dist = {};
-  if (won) {
-    const g = String(guesses.length);
-    st.dist[g] = (st.dist[g] || 0) + 1;
-  } else {
-    st.dist['X'] = (st.dist['X'] || 0) + 1;
+  // Only update distribution when the game just finished, not on page reload
+  if (record) {
+    if (!st.dist) st.dist = {};
+    if (won) {
+      const g = String(guesses.length);
+      st.dist[g] = (st.dist[g] || 0) + 1;
+    } else {
+      st.dist['X'] = (st.dist['X'] || 0) + 1;
+    }
+    localStorage.setItem('mackemdle_stats_cf1', JSON.stringify(st));
   }
-  localStorage.setItem('mackemdle_stats_cf1', JSON.stringify(st));
   const hintBadge = hintUsed ? `<div class="hint-used-badge">&#128161; Hint used</div>` : '';
   const dist = st.dist;
   const numGuesses = guesses.length;
