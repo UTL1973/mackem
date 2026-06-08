@@ -313,7 +313,7 @@ function share() {
   const won = guesses[guesses.length - 1] === ANS;
   const hintMark = hintUsed ? ' 💡' : '';
   const grid = guesses.map(g => ev(g, ANS).map(r => r.s === 'correct' ? '🟥' : r.s === 'present' ? '🟨' : '⬛').join('')).join('\n');
-  const txt = `Mackem-dle 🔴⚪${hintMark}\n${won ? guesses.length : 'X'}/${MAX} (${WL} letters)\n\n${grid}\nmackemdle.pages.dev`;
+  const txt = `Mackem-dle 🔴⚪${hintMark}\n${won ? guesses.length : 'X'}/${MAX} (${WL} letters)\n\n${grid}\nwww.mackem-dle.com`;
   if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => {
     const b = document.querySelector('.sbtn');
     if (b) { b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Share result', 2000); }
