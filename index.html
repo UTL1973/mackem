@@ -175,8 +175,17 @@ function saveState(won) {
     if (over && won !== undefined) {
       const st = getSt();
       st.played = (st.played || 0) + 1;
-      if (won) { st.wins = (st.wins || 0) + 1; st.streak = (st.streak || 0) + 1; st.max = Math.max(st.max || 0, st.streak); }
-      else st.streak = 0;
+      if (!st.dist) st.dist = {};
+      if (won) {
+        st.wins = (st.wins || 0) + 1;
+        st.streak = (st.streak || 0) + 1;
+        st.max = Math.max(st.max || 0, st.streak);
+        const g = String(guesses.length);
+        st.dist[g] = (st.dist[g] || 0) + 1;
+      } else {
+        st.streak = 0;
+        st.dist['X'] = (st.dist['X'] || 0) + 1;
+      }
       localStorage.setItem('mackemdle_stats_cf1', JSON.stringify(st));
     }
     localStorage.setItem('mackemdle_cf1', JSON.stringify({ date: new Date().toDateString(), guesses, ks, over, hintUsed }));
@@ -283,9 +292,28 @@ function sub() {
   else saveState(undefined);
 }
 
+function buildDistChart(dist, currentGuesses, won) {
+  const rows = [1,2,3,4,5,6];
+  const max = Math.max(1, ...rows.map(r => dist[String(r)] || 0));
+  return rows.map(r => {
+    const count = dist[String(r)] || 0;
+    const pct = Math.max(count > 0 ? 8 : 0, Math.round((count / max) * 100));
+    const highlight = won && guesses.length === r;
+    const bg = highlight ? 'background:var(--correct)' : 'background:rgba(255,255,255,0.2)';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <div style="width:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);text-align:right;flex-shrink:0">${r}</div>
+      <div style="flex:1;height:24px;border-radius:3px;${bg};min-width:24px;width:${pct}%;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .4s ease">
+        <span style="font-size:12px;font-weight:700;color:#fff">${count}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function showResult(won) {
   const st = getSt();
   const hintBadge = hintUsed ? `<div class="hint-used-badge">&#128161; Hint used</div>` : '';
+  const dist = st.dist || {};
+  const distChart = buildDistChart(dist, guesses.length, won);
   document.getElementById('result-content').innerHTML = `
     <div style="font-size:28px;margin-bottom:6px">${won ? '&#128308;&#9898;' : '&#128532;'}</div>
     <h2>${won ? 'MAGIC!' : 'UNLUCKY!'}</h2>
@@ -299,6 +327,10 @@ function showResult(won) {
       <div class="stat"><div class="snum">${st.wins||0}</div><div class="slbl">Wins</div></div>
       <div class="stat"><div class="snum">${st.streak||0}</div><div class="slbl">Streak</div></div>
       <div class="stat"><div class="snum">${st.max||0}</div><div class="slbl">Best</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <p style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:10px">Guess Distribution</p>
+      ${distChart}
     </div>
     <button class="sbtn" onclick="share()">Share result</button>
     <a class="result-coffee" href="https://buymeacoffee.com/underthelight73" target="_blank" rel="noopener">&#9749; Buy me a coffee</a>
