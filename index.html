@@ -56,11 +56,11 @@
   @keyframes msgBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
   .confetti-piece{position:fixed;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:9998;animation:confettiFall linear forwards;}
   #haway-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9997;pointer-events:none;transition:background 0.4s ease;}
-  #haway-overlay.darken{background:rgba(0,0,0,0.6);}
-  #haway-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);opacity:0;z-index:9999;pointer-events:none;background:#000;border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:24px 36px;text-align:center;}
+  #haway-overlay.darken{background:rgba(0,0,0,0.65);}
+  #haway-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);opacity:0;z-index:10000;pointer-events:none;background:#000;border:2px solid rgba(255,255,255,0.2);border-radius:14px;padding:28px 40px;text-align:center;width:max-content;max-width:85vw;}
   #haway-msg.show{animation:msgPop .4s ease forwards, msgBounce .6s ease 0.4s 4;}
-  #haway-msg .hw-line1{display:block;font-family:Arial,sans-serif;font-size:clamp(22px,7vw,36px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#EB172B;}
-  #haway-msg .hw-line2{display:block;font-family:Arial,sans-serif;font-size:clamp(22px,7vw,36px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ffffff;}
+  #haway-msg .hw-line1{display:block;font-family:Arial,sans-serif;font-size:clamp(26px,8vw,42px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#EB172B;}
+  #haway-msg .hw-line2{display:block;font-family:Arial,sans-serif;font-size:clamp(26px,8vw,42px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ffffff;}
   #kb{display:flex;flex-direction:column;gap:clamp(4px,1.2vw,6px);width:100%;padding:0 2px;margin-bottom:6px;}
   .krow{display:flex;justify-content:center;gap:clamp(3px,1vw,5px);}
   .key{height:var(--key-h);min-width:0;padding:0 2px;background:rgba(255,255,255,0.13);border:none;border-radius:5px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-transform:uppercase;user-select:none;flex:1;touch-action:manipulation;-webkit-user-select:none;}
@@ -361,9 +361,8 @@ function spawnConfetti() {
     setTimeout(() => {
       const el = document.createElement('div');
       el.className = 'confetti-piece';
-      const color = colors[Math.floor(Math.random() * colors.length)];
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
       const isCircle = Math.random() > 0.55;
-      el.style.background = color;
       el.style.left = (Math.random() * 100) + 'vw';
       el.style.top = '-12px';
       el.style.width = isCircle ? '7px' : (5 + Math.random() * 6) + 'px';
@@ -371,10 +370,10 @@ function spawnConfetti() {
       el.style.borderRadius = isCircle ? '50%' : '2px';
       const dur = 1.4 + Math.random() * 1.6;
       el.style.animationDuration = dur + 's';
-      el.style.animationDelay = (Math.random() * 0.5) + 's';
+      el.style.animationDelay = (Math.random() * 0.4) + 's';
       document.body.appendChild(el);
       setTimeout(() => el.remove(), (dur + 1) * 1000);
-    }, i * 22);
+    }, i * 20);
   }
 }
 
@@ -391,33 +390,31 @@ function showHawayMsg() {
   document.body.appendChild(msg);
   setTimeout(() => msg.classList.add('show'), 100);
   setTimeout(() => {
-    msg.style.transition = 'opacity 0.5s';
-    overlay.style.transition = 'background 0.5s';
+    msg.style.transition = 'opacity 0.5s ease';
+    overlay.style.transition = 'background 0.5s ease';
     msg.style.opacity = '0';
     overlay.style.background = 'rgba(0,0,0,0)';
-    setTimeout(() => { msg.remove(); overlay.remove(); }, 500);
-  }, 2600);
+    setTimeout(() => { msg.remove(); overlay.remove(); }, 520);
+  }, 2500);
 }
 
 function celebrateWin(callback) {
   const ri = guesses.length - 1;
-  // Flip each winning tile
   for (let c = 0; c < WL; c++) {
     const t = document.getElementById('t' + ri + c);
     if (!t) continue;
-    const delay = c * 110;
     setTimeout(() => {
       t.style.animation = 'flip .35s ease';
       setTimeout(() => { t.style.animation = ''; }, 350);
-    }, delay);
+    }, c * 110);
   }
-  // Fire confetti and message after tiles finish
+  // Fire confetti and haway message after tiles finish
   setTimeout(() => {
     spawnConfetti();
     showHawayMsg();
   }, WL * 110 + 100);
-  // Then show result screen
-  setTimeout(callback, WL * 110 + 2800);
+  // Show result screen only after haway has fully faded (2500ms msg + 520ms fade)
+  setTimeout(callback, WL * 110 + 3200);
 }
 
 function showResult(won, record = false) {
