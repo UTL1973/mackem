@@ -9,7 +9,7 @@
 <meta property="og:description" content="Daily Sunderland AFC player wordle. Guess the surname!">
 <meta property="og:type" content="website">
 <style>
-  :root{--red:#EB172B;--red-dark:#A50E1C;--correct:#EB172B;--present:#c17f00;--absent:#4a4a5a;--key-absent:#2a2a3a;
+  :root{--red:#EB172B;--red-dark:#A50E1C;--correct:#EB172B;--present:#ffffff;--absent:#4a4a5a;--key-absent:#2a2a3a;
     --tile-size:52px;--tile-font:20px;
     --key-h:46px;--key-font:16px;
   }
@@ -44,19 +44,29 @@
   .tile{width:var(--tile-size);height:var(--tile-size);border:2px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:var(--tile-font);font-weight:700;text-transform:uppercase;color:#fff;background:rgba(255,255,255,0.03);border-radius:4px;transition:transform .1s;}
   .tile.filled{border-color:rgba(255,255,255,0.35);transform:scale(1.05);animation:pop .1s ease;}
   .tile.correct{background:var(--correct);border-color:var(--correct);animation:flip .5s ease forwards;}
-  .tile.present{background:var(--present);border-color:var(--present);animation:flip .5s ease forwards;}
+  .tile.present{background:var(--present);border-color:var(--present);color:#000;animation:flip .5s ease forwards;}
   .tile.absent{background:var(--absent);border-color:var(--absent);animation:flip .5s ease forwards;}
   .tile.shake{animation:shake .4s ease;}
   @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1.05)}}
   @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
   @keyframes bounce-in{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+  @keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+  @keyframes msgPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  @keyframes msgBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  .confetti-piece{position:fixed;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:9998;animation:confettiFall linear forwards;}
+  #haway-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9997;pointer-events:none;transition:background 0.4s ease;}
+  #haway-overlay.darken{background:rgba(0,0,0,0.6);}
+  #haway-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);opacity:0;z-index:9999;pointer-events:none;background:#000;border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:24px 36px;text-align:center;}
+  #haway-msg.show{animation:msgPop .4s ease forwards, msgBounce .6s ease 0.4s 4;}
+  #haway-msg .hw-line1{display:block;font-family:Arial,sans-serif;font-size:clamp(22px,7vw,36px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#EB172B;}
+  #haway-msg .hw-line2{display:block;font-family:Arial,sans-serif;font-size:clamp(22px,7vw,36px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ffffff;}
   #kb{display:flex;flex-direction:column;gap:clamp(4px,1.2vw,6px);width:100%;padding:0 2px;margin-bottom:6px;}
   .krow{display:flex;justify-content:center;gap:clamp(3px,1vw,5px);}
   .key{height:var(--key-h);min-width:0;padding:0 2px;background:rgba(255,255,255,0.13);border:none;border-radius:5px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;text-transform:uppercase;user-select:none;flex:1;touch-action:manipulation;-webkit-user-select:none;}
   .key:active{opacity:.7;}
   .key.wide{flex:1.5;font-size:12px;}
-  .key.correct{background:var(--correct)!important;}.key.present{background:var(--present)!important;}.key.absent{background:var(--key-absent)!important;color:rgba(255,255,255,.35);}
+  .key.correct{background:var(--correct)!important;}.key.present{background:#ffffff!important;color:#000!important;}.key.absent{background:var(--key-absent)!important;color:rgba(255,255,255,.35);}
   #result-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center;z-index:9999;padding:16px;}
   #result-inner{background:#111;border:1px solid rgba(235,23,43,.35);border-radius:12px;padding:18px 20px;max-width:360px;width:100%;text-align:center;position:relative;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   #result-panel .rclose{position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,.4);font-size:22px;cursor:pointer;line-height:1;padding:4px;touch-action:manipulation;}
@@ -130,7 +140,7 @@
     </ul>
     <div class="legend">
       <div class="li"><div class="lt" style="background:var(--correct);color:#fff;">A</div>Right position</div>
-      <div class="li"><div class="lt" style="background:var(--present);color:#fff;">B</div>Wrong position</div>
+      <div class="li"><div class="lt" style="background:#ffffff;color:#000;border:1px solid rgba(0,0,0,0.15);">B</div>Wrong position</div>
       <div class="li"><div class="lt" style="background:var(--absent);color:#fff;">C</div>Not in name</div>
     </div>
     <button class="mbtn" onclick="closeHelp()">Let&rsquo;s play!</button>
@@ -165,8 +175,17 @@ function getUKDayIdx() {
   return Math.floor((new Date(ukToday) - new Date(ukEpoch)) / msPerDay);
 }
 const DAY_IDX = getUKDayIdx();
+// Players to skip as daily answers (too long/awkward) but still valid as guesses
+const SKIP_ANSWERS = new Set(['MOBERGKARLSSON','SAMUELOGUNSUYI']);
 function daily() {
-  return P[DAY_IDX % P.length];
+  // Step forward through the list, skipping any names in SKIP_ANSWERS
+  let idx = DAY_IDX % P.length;
+  let attempts = 0;
+  while (SKIP_ANSWERS.has(P[idx].name) && attempts < P.length) {
+    idx = (idx + 1) % P.length;
+    attempts++;
+  }
+  return P[idx];
 }
 const D = daily(), ANS = D.name, WL = ANS.length;
 let guesses = [], cur = '', over = false, ks = {};
@@ -314,7 +333,7 @@ function sub() {
   updateKeys(cur, ANS); setTimeout(updateKB, WL * 120 + 50);
   guesses.push(cur); const won = cur === ANS; cur = '';
   setTimeout(updateHintArea, WL * 120 + 60);
-  if (won) { over = true; saveState(true); setTimeout(() => showResult(true, true), WL * 120 + 300); }
+  if (won) { over = true; saveState(true); setTimeout(() => celebrateWin(() => showResult(true, true)), WL * 120 + 50); }
   else if (guesses.length >= MAX) { over = true; saveState(false); setTimeout(() => showResult(false, true), WL * 120 + 300); }
   else saveState(undefined);
 }
@@ -334,6 +353,71 @@ function buildDistChart(dist, numGuesses, won) {
       </div>
     </div>`;
   }).join('');
+}
+
+function spawnConfetti() {
+  const colors = ['#EB172B','#EB172B','#ffffff','#EB172B','#ffffff','#cc0000','#ffffff','#EB172B'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const isCircle = Math.random() > 0.55;
+      el.style.background = color;
+      el.style.left = (Math.random() * 100) + 'vw';
+      el.style.top = '-12px';
+      el.style.width = isCircle ? '7px' : (5 + Math.random() * 6) + 'px';
+      el.style.height = isCircle ? '7px' : (8 + Math.random() * 8) + 'px';
+      el.style.borderRadius = isCircle ? '50%' : '2px';
+      const dur = 1.4 + Math.random() * 1.6;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1) * 1000);
+    }, i * 22);
+  }
+}
+
+function showHawayMsg() {
+  document.getElementById('haway-overlay')?.remove();
+  document.getElementById('haway-msg')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'haway-overlay';
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.classList.add('darken'), 20);
+  const msg = document.createElement('div');
+  msg.id = 'haway-msg';
+  msg.innerHTML = "<span class='hw-line1'>Ha\'way</span><span class='hw-line2'>the lads!</span>";
+  document.body.appendChild(msg);
+  setTimeout(() => msg.classList.add('show'), 100);
+  setTimeout(() => {
+    msg.style.transition = 'opacity 0.5s';
+    overlay.style.transition = 'background 0.5s';
+    msg.style.opacity = '0';
+    overlay.style.background = 'rgba(0,0,0,0)';
+    setTimeout(() => { msg.remove(); overlay.remove(); }, 500);
+  }, 2600);
+}
+
+function celebrateWin(callback) {
+  const ri = guesses.length - 1;
+  // Flip each winning tile
+  for (let c = 0; c < WL; c++) {
+    const t = document.getElementById('t' + ri + c);
+    if (!t) continue;
+    const delay = c * 110;
+    setTimeout(() => {
+      t.style.animation = 'flip .35s ease';
+      setTimeout(() => { t.style.animation = ''; }, 350);
+    }, delay);
+  }
+  // Fire confetti and message after tiles finish
+  setTimeout(() => {
+    spawnConfetti();
+    showHawayMsg();
+  }, WL * 110 + 100);
+  // Then show result screen
+  setTimeout(callback, WL * 110 + 2800);
 }
 
 function showResult(won, record = false) {
@@ -383,7 +467,7 @@ function closeResult() { document.getElementById('result-panel').style.display =
 function share() {
   const won = guesses[guesses.length - 1] === ANS;
   const hintMark = hintUsed ? ' 💡' : '';
-  const grid = guesses.map(g => ev(g, ANS).map(r => r.s === 'correct' ? '🟥' : r.s === 'present' ? '🟨' : '⬛').join('')).join('\n');
+  const grid = guesses.map(g => ev(g, ANS).map(r => r.s === 'correct' ? '🟥' : r.s === 'present' ? '⬜' : '⬛').join('')).join('\n');
   const txt = `Mackem-dle 🔴⚪${hintMark}\n${won ? guesses.length : 'X'}/${MAX} (${WL} letters)\n\n${grid}\nwww.mackem-dle.com`;
   if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => {
     const b = document.querySelector('.sbtn');
