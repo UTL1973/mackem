@@ -403,7 +403,7 @@ function showHawayMsg() {
   if (r2rect && r3rect) {
     // Midpoint between top of row3 and bottom of row4 relative to game
     topPx = ((r2rect.top + r3rect.bottom) / 2) - gameRect.top;
-    leftPx = (r2rect.left + r2rect.width / 2) - gameRect.left;
+    leftPx = (r2rect.left + r2rect.width / 2) - gameRect.left - (r2rect.width * 0.25);
   } else {
     topPx = game.offsetHeight * 0.5;
     leftPx = game.offsetWidth / 2;
