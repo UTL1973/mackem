@@ -57,7 +57,7 @@
   .confetti-piece{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:199;animation:confettiFall linear forwards;}
   #haway-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);z-index:200;pointer-events:none;transition:background 0.4s ease;border-radius:12px;}
   #haway-overlay.darken{background:rgba(0,0,0,0.65);}
-  #haway-msg{position:absolute;transform:translate(-50%,-50%) scale(0.5);opacity:0;z-index:201;pointer-events:none;background:#000;border:2px solid rgba(255,255,255,0.2);border-radius:14px;padding:24px 32px;text-align:center;width:75%;max-width:300px;}
+  #haway-msg{position:absolute;transform:translate(-50%,-50%) scale(0.5);opacity:0;z-index:201;pointer-events:none;background:#000;border:2px solid rgba(255,255,255,0.2);border-radius:14px;padding:22px 28px;text-align:center;width:60%;}
   #haway-msg.show{animation:msgPop .4s ease forwards, msgBounce .6s ease 0.4s 4;}
   #haway-msg .hw-line1{display:block;font-family:Arial,sans-serif;font-size:clamp(26px,8vw,40px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#EB172B;}
   #haway-msg .hw-line2{display:block;font-family:Arial,sans-serif;font-size:clamp(26px,8vw,40px);font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#ffffff;}
@@ -380,15 +380,10 @@ function spawnConfetti() {
 
 function showHawayMsg() {
   const game = document.getElementById('game');
-  const grid = document.getElementById('grid');
+  const row2 = document.getElementById('r2');
+  const row3 = document.getElementById('r3');
   document.getElementById('haway-overlay')?.remove();
   document.getElementById('haway-msg')?.remove();
-
-  // Measure grid position relative to #game
-  const gameRect = game.getBoundingClientRect();
-  const gridRect = grid.getBoundingClientRect();
-  const gridCenterY = gridRect.top - gameRect.top + gridRect.height / 2;
-  const gridCenterX = gridRect.left - gameRect.left + gridRect.width / 2;
 
   const overlay = document.createElement('div');
   overlay.id = 'haway-overlay';
@@ -398,9 +393,24 @@ function showHawayMsg() {
   const msg = document.createElement('div');
   msg.id = 'haway-msg';
   msg.innerHTML = "<span class='hw-line1'>Ha\'way</span><span class='hw-line2'>the lads!</span>";
-  // Position exactly over the grid centre
-  msg.style.top = gridCenterY + 'px';
-  msg.style.left = gridCenterX + 'px';
+
+  // Place relative to rows 3&4 (index 2&3) within the game element
+  const gameRect = game.getBoundingClientRect();
+  const r2rect = row2 ? row2.getBoundingClientRect() : null;
+  const r3rect = row3 ? row3.getBoundingClientRect() : null;
+
+  let topPx, leftPx;
+  if (r2rect && r3rect) {
+    // Midpoint between top of row3 and bottom of row4 relative to game
+    topPx = ((r2rect.top + r3rect.bottom) / 2) - gameRect.top;
+    leftPx = (r2rect.left + r2rect.width / 2) - gameRect.left;
+  } else {
+    topPx = game.offsetHeight * 0.5;
+    leftPx = game.offsetWidth / 2;
+  }
+
+  msg.style.top = topPx + 'px';
+  msg.style.left = leftPx + 'px';
   game.appendChild(msg);
   setTimeout(() => msg.classList.add('show'), 100);
   setTimeout(() => {
