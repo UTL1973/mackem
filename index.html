@@ -352,12 +352,11 @@ function buildDistChart(dist, numGuesses, won, totalPlayed) {
         ? 'background:rgba(255,255,255,0.3)'
         : 'background:rgba(255,255,255,0.07)';
     const textColor = highlight ? '#fff' : count > 0 ? '#fff' : 'rgba(255,255,255,0.25)';
-    const pctLabel = count > 0 ? Math.round((count / total) * 100) + '%' : '';
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <div style="width:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-align:right;flex-shrink:0">${r}</div>
       <div style="flex:1;position:relative;height:26px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
-        <div style="height:100%;border-radius:3px;${bg};width:${pct}%;transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;">
-          <span style="font-size:12px;font-weight:700;color:${textColor}">${count > 0 ? count + ' (' + pctLabel + ')' : ''}</span>
+        <div style="height:100%;border-radius:3px;${bg};width:${pct}%;transition:width 0.6s ease;min-width:${count > 0 ? '28px' : '0'};display:flex;align-items:center;justify-content:flex-end;padding-right:7px;">
+          <span style="font-size:12px;font-weight:700;color:${textColor}">${count > 0 ? count : ''}</span>
         </div>
       </div>
     </div>`;
