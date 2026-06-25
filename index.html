@@ -338,18 +338,27 @@ function sub() {
   else saveState(undefined);
 }
 
-function buildDistChart(dist, numGuesses, won) {
+function buildDistChart(dist, numGuesses, won, totalPlayed) {
   const rows = [1,2,3,4,5,6];
-  const max = Math.max(1, ...rows.map(r => dist[String(r)] || 0));
+  const total = totalPlayed || 1;
   return rows.map(r => {
     const count = dist[String(r)] || 0;
-    const pct = Math.max(count > 0 ? 8 : 0, Math.round((count / max) * 100));
+    // Width = percentage of total games played (so all bars add up to <= 100%)
+    const pct = count > 0 ? Math.max(6, Math.round((count / total) * 100)) : 0;
     const highlight = won && numGuesses === r;
-    const bg = highlight ? 'background:var(--correct)' : 'background:rgba(255,255,255,0.2)';
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-      <div style="width:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);text-align:right;flex-shrink:0">${r}</div>
-      <div style="flex:1;height:24px;border-radius:3px;${bg};min-width:24px;width:${pct}%;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .4s ease">
-        <span style="font-size:12px;font-weight:700;color:#fff">${count}</span>
+    const bg = highlight
+      ? 'background:var(--correct)'
+      : count > 0
+        ? 'background:rgba(255,255,255,0.3)'
+        : 'background:rgba(255,255,255,0.07)';
+    const textColor = highlight ? '#fff' : count > 0 ? '#fff' : 'rgba(255,255,255,0.25)';
+    const pctLabel = count > 0 ? Math.round((count / total) * 100) + '%' : '';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="width:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-align:right;flex-shrink:0">${r}</div>
+      <div style="flex:1;position:relative;height:26px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;border-radius:3px;${bg};width:${pct}%;transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;">
+          <span style="font-size:12px;font-weight:700;color:${textColor}">${count > 0 ? count + ' (' + pctLabel + ')' : ''}</span>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -457,7 +466,7 @@ function showResult(won, record = false) {
   const hintBadge = hintUsed ? `<div class="hint-used-badge">&#128161; Hint used</div>` : '';
   const dist = st.dist;
   const numGuesses = guesses.length;
-  const distChart = buildDistChart(dist, numGuesses, won);
+  const distChart = buildDistChart(dist, numGuesses, won, st.played || 1);
   document.getElementById('result-content').innerHTML = `
     <div style="font-size:28px;margin-bottom:6px">${won ? '&#128308;&#9898;' : '&#128532;'}</div>
     <h2>${won ? 'MAGIC!' : 'UNLUCKY!'}</h2>
