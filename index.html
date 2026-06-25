@@ -343,13 +343,22 @@ function buildDistChart(dist, numGuesses, won) {
   const max = Math.max(1, ...rows.map(r => dist[String(r)] || 0));
   return rows.map(r => {
     const count = dist[String(r)] || 0;
-    const pct = Math.max(count > 0 ? 8 : 0, Math.round((count / max) * 100));
+    // Always show a visible bar — minimum 4% width so empty bars are visible
+    const pct = count > 0 ? Math.max(8, Math.round((count / max) * 100)) : 4;
     const highlight = won && numGuesses === r;
-    const bg = highlight ? 'background:var(--correct)' : 'background:rgba(255,255,255,0.2)';
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-      <div style="width:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);text-align:right;flex-shrink:0">${r}</div>
-      <div style="flex:1;height:24px;border-radius:3px;${bg};min-width:24px;width:${pct}%;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .4s ease">
-        <span style="font-size:12px;font-weight:700;color:#fff">${count}</span>
+    // Today's score = red, has history = light bar, no history = very faint bar
+    const bg = highlight
+      ? 'background:var(--correct)'
+      : count > 0
+        ? 'background:rgba(255,255,255,0.25)'
+        : 'background:rgba(255,255,255,0.07)';
+    const textColor = highlight ? '#fff' : count > 0 ? '#fff' : 'rgba(255,255,255,0.3)';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="width:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-align:right;flex-shrink:0">${r}</div>
+      <div style="flex:1;position:relative;height:26px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;border-radius:3px;${bg};width:${pct}%;transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;">
+          <span style="font-size:12px;font-weight:700;color:${textColor}">${count}</span>
+        </div>
       </div>
     </div>`;
   }).join('');
